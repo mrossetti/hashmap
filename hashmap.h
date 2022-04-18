@@ -293,7 +293,7 @@ HM_API_IMPL bool32 _hm_next(HashMap* hm, hm_Item** it) {
 #ifdef HASHMAP_TEST
 
 typedef struct FakeK { s64 x, y, z; } FakeK;
-typedef struct FakeV { char tag[2]; } FakeV;
+typedef struct FakeV { char tag; } FakeV;
 
 void hm_print(HashMap* hm) {
     FakeK* k;
@@ -303,7 +303,7 @@ void hm_print(HashMap* hm) {
     for (hm_Item* it = null; _hm_next(hm, &it);) {
         k = it->key;
         v = it->value;
-        printf("  { %lld, %lld, %lld } => { %s },\n", k->x, k->y, k->z, v->tag);
+        printf("  { %lld, %lld, %lld } => { %c },\n", k->x, k->y, k->z, v->tag);
     }
     printf("}\n");
 }
@@ -322,14 +322,14 @@ int main(int argc, char* argv[]) {
         k.x = i; k.y = i; k.z = i;
 
         switch (i) {
-            case 0: v.tag[0] = 'z'; v.tag[1] = '\0'; break;
-            case 1: v.tag[0] = 'o'; v.tag[1] = '\0'; break;
-            case 2: v.tag[0] = 't'; v.tag[1] = '\0'; break;
-            case 3: v.tag[0] = 'T'; v.tag[1] = '\0'; break;
-            case 4: v.tag[0] = 'f'; v.tag[1] = '\0'; break;
-            case 5: v.tag[0] = 'F'; v.tag[1] = '\0'; break;
-            case 6: v.tag[0] = 's'; v.tag[1] = '\0'; break;
-            case 7: v.tag[0] = 'S'; v.tag[1] = '\0'; break;
+            case 0: v.tag = 'z'; break;
+            case 1: v.tag = 'o'; break;
+            case 2: v.tag = 't'; break;
+            case 3: v.tag = 'T'; break;
+            case 4: v.tag = 'f'; break;
+            case 5: v.tag = 'F'; break;
+            case 6: v.tag = 's'; break;
+            case 7: v.tag = 'S'; break;
             default:
                 panic("invalid tag!");
         }
@@ -356,7 +356,7 @@ int main(int argc, char* argv[]) {
     FakeK k4 = (FakeK){ 4, 4, 4 }; 
     FakeV* v4 = (FakeV*)hm_get(&hm, &k4);
 
-    printf("Get { %lld, %lld, %lld } => %s\n", k4.x, k4.y, k4.z, v4->tag);
+    printf("Get { %lld, %lld, %lld } => %c\n", k4.x, k4.y, k4.z, v4->tag);
     printf("Pop { %lld, %lld, %lld }\n", k4.x, k4.y, k4.z);
     
     hm_pop(&hm, &k4);
@@ -367,7 +367,7 @@ int main(int argc, char* argv[]) {
     FakeV* vals = hm_values(&hm);
 
     for (u32 i = 0; i < hm.len; ++i) {
-        printf("{ %lld } => { %c }\n", keys[i].x, vals[i].tag[0]);
+        printf("{ %lld } => { %c }\n", keys[i].x, vals[i].tag);
     }
 
     hm_free(&hm);
