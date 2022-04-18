@@ -48,8 +48,8 @@ typedef struct {
     bool32 (*comp_key)(const hm_K*, const hm_K*, size_t);  // comp function (key == key')
 } HashMap;
 
-HM_API_DECL bool32 hm_comp_default(const hm_K* key, const hm_K* key1, size_t sz);
 HM_API_DECL size_t hm_hash_default(const hm_K* key, size_t sz);
+HM_API_DECL bool32 hm_comp_default(const hm_K* key, const hm_K* key1, size_t sz);
 HM_API_DECL HashMap* hm_init(HashMap* hm, u32 cap, u32 sizeof_K, u32 sizeof_V, size_t (*hash_key)(const void*, size_t), bool32 (*comp_key)(const void*, const void*, size_t));
 HM_API_DECL void hm_free(HashMap* hm);
 HM_API_DECL bool32 hm_resize(HashMap* hm, u32 cap);
@@ -67,10 +67,6 @@ HM_API_DECL bool32 _hm_next(HashMap* hm, hm_Item** it);
 #define HM_API_IMPL static
 #endif
 
-HM_API_IMPL bool32 hm_comp_default(const hm_K* key, const hm_K* key1, size_t sz) {
-    return (memcmp(key, key1, sz) == 0);
-}
-
 HM_API_IMPL size_t hm_hash_default(const hm_K* key, size_t sz) {
     const byte* blob = (const byte*)key;
     size_t hash = 0;
@@ -86,6 +82,10 @@ HM_API_IMPL size_t hm_hash_default(const hm_K* key, size_t sz) {
     hash += (hash << 15);
 
     return hash;
+}
+
+HM_API_IMPL bool32 hm_comp_default(const hm_K* key, const hm_K* key1, size_t sz) {
+    return (memcmp(key, key1, sz) == 0);
 }
 
 HM_API_IMPL HashMap* hm_init(HashMap* hm, u32 cap, u32 sizeof_K, u32 sizeof_V,
