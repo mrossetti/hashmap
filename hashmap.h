@@ -91,8 +91,10 @@ HM_API_IMPL bool32 hm_comp_default(const hm_K* key, const hm_K* key1, size_t sz)
 HM_API_IMPL HashMap* hm_init(HashMap* hm, u32 cap, u32 sizeof_K, u32 sizeof_V,
                              size_t (*hash_key)(const void*, size_t),
                              bool32 (*comp_key)(const void*, const void*, size_t)) {
+    assert(hm);
+    
     size_t sz = cap * (sizeof(hm_Item) + sizeof_K + sizeof_V);
-    void* mem = malloc(sz); memset(mem, 0, sz);
+    void* mem = calloc(1, sz);
 
     hm->mem = mem;
     hm->len = 0;
@@ -101,6 +103,10 @@ HM_API_IMPL HashMap* hm_init(HashMap* hm, u32 cap, u32 sizeof_K, u32 sizeof_V,
     hm->sizeof_V = sizeof_V;
     hm->hash_key = hash_key;
     hm->comp_key = comp_key;
+
+    if (mem == null) {
+        return null;
+    }
 
     return hm;
 }
@@ -112,10 +118,10 @@ HM_API_IMPL void hm_free(HashMap* hm) {
 }
 
 HM_API_IMPL bool32 hm_resize(HashMap* hm, u32 cap) {
-    assert(cap >= hm->len);
+    assert(hm && cap >= hm->len);
 
     size_t sz = cap * (sizeof(hm_Item) + hm->sizeof_K + hm->sizeof_V);
-    void* mem = malloc(sz); memset(mem, 0, sz);
+    void* mem = calloc(1, sz);
     
     if (mem == null) {
         return false;  // allocation failed
@@ -160,6 +166,8 @@ HM_API_IMPL bool32 hm_resize(HashMap* hm, u32 cap) {
 }
 
 HM_API_IMPL bool32 hm_put(HashMap* hm, const hm_K* key, const hm_V* value) {
+    assert(hm);
+
     if (hm->len > (hm->cap * HM_MAX_LOAD_FACTOR)) {
         bool32 ok = hm_resize(hm, hm->cap * 2);
 
@@ -204,6 +212,8 @@ HM_API_IMPL bool32 hm_put(HashMap* hm, const hm_K* key, const hm_V* value) {
 }
 
 HM_API_IMPL bool32 hm_pop(HashMap* hm, const hm_K* key) {
+    assert(hm);
+
     u64 hash = hm->hash_key(key, hm->sizeof_K);
     u32 index = hash % hm->cap;
     u32 last;
@@ -241,6 +251,8 @@ HM_API_IMPL bool32 hm_pop(HashMap* hm, const hm_K* key) {
 }
 
 HM_API_IMPL hm_V* hm_get(HashMap* hm, const hm_K* key) {
+    assert(hm);
+
     u64 hash = hm->hash_key(key, hm->sizeof_K);
     u32 cap = hm->cap;
     u32 index = hash % cap;
@@ -263,6 +275,8 @@ HM_API_IMPL hm_V* hm_get(HashMap* hm, const hm_K* key) {
 }
 
 HM_API_IMPL bool32 _hm_next(HashMap* hm, hm_Item** it) {
+    assert(hm);
+
     // iteration over the sparse items (less efficient because sparse and ptr indirection), should be marked as internal as it only serves as an inspection tool!
     // (iteration over the keys or values dense storages directly, casted to the actual K* and V* types, should always be preferred for performance reasons!)
     hm_Item* items = hm->mem;
